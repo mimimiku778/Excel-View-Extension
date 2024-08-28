@@ -33,7 +33,7 @@ export default function HighlightRow({ setError }: { setError: SetError }) {
           disabled={!isEnabled}
         ></input>
       </Button>
-      <FormControlLabel
+      {/* <FormControlLabel
         sx={{ width: "fit-content", userSelect: "none" }}
         control={
           <Switch
@@ -43,7 +43,7 @@ export default function HighlightRow({ setError }: { setError: SetError }) {
           />
         }
         label="Keep Selection"
-      />
+      /> */}
     </Stack>
   );
 }
