@@ -1,9 +1,9 @@
-import { SetMessage } from "../../hooks/useErrorSnackbar";
+import { SetError } from "../../hooks/useErrorSnackbar";
 
 namespace ColumnProfile {
   // Get the active worksheet name
   export async function getActiveSheetName(
-    setError: SetMessage,
+    setError: SetError,
     callback: (activeSheetName: string) => Promise<void> | void
   ) {
     await Excel.run(async (context) => {
@@ -22,7 +22,7 @@ namespace ColumnProfile {
    */
   export async function getColumnsFromWorksheet(
     rangeAddress: string,
-    setError: SetMessage,
+    setError: SetError,
     callback: (activeSheetName: string, columns: number[]) => Promise<void> | void
   ) {
     await Excel.run(async (context) => {
@@ -58,7 +58,7 @@ namespace ColumnProfile {
   export async function setColumnsToWorksheet(
     columns: number[],
     rangeAddress: string,
-    setError: SetMessage,
+    setError: SetError,
     callback?: () => Promise<void> | void
   ) {
     await Excel.run(async (context) => {

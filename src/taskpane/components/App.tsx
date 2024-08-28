@@ -4,7 +4,6 @@ import useErrorSnackbar from "../hooks/useErrorSnackbar";
 import SnackbarUi from "./SnackBarUi";
 import HighlightRow from "./HighlightRow";
 import ColumnProfileList from "./ColumnProfileList";
-import AlignItemsList from "./AlignItemsList";
 
 interface AppProps {
   title: string;
@@ -19,7 +18,6 @@ export default function App({}: AppProps) {
         <Stack direction="column" spacing={2} p={1} divider={<Divider orientation="horizontal" flexItem />}>
           <HighlightRow setError={setError} />
           <ColumnProfileList setError={setError} />
-          <AlignItemsList />
         </Stack>
       </FormGroup>
       <SnackbarUi messages={errors} setMessage={setError} severity={"warning"} autoHideDuration={6000} clickAway />
