@@ -6,7 +6,7 @@ const CONDITIONAL_FORMAT_FORMULA = '=CELL("ROW")';
 const SELECT_EVENT_TIMEOUT_MS = 30;
 const CHANGE_COLOR_TIMEOUT_MS = 100;
 
-export type HighlighterOption = { keepSelection: boolean; xColor: string };
+export type HighlighterOption = { xColor: string };
 type TimeoutId = { id: NodeJS.Timeout | null | number };
 
 export default class Highlighter {
@@ -46,10 +46,8 @@ export default class Highlighter {
   }
 
   private async executeHighlight() {
-    if (!this.option.keepSelection) {
-      // Clear the previous conditional format
-      await Cleaner.create(this.setError).clearPrevious();
-    }
+    // Clear the previously highlighted rows
+    await Cleaner.create(this.setError).clearPrevious();
 
     await Excel.run(async (context) => {
       // Get the active worksheet and the selected range
@@ -70,11 +68,7 @@ export default class Highlighter {
 
       // Highlight the active row
       for (const item of rangeArea.areas.items) {
-        if (this.option.keepSelection) {
-          await this.processHighlightEachRow(context, item.getEntireRow(), sheet.name);
-        } else {
-          await this.processHighlight(context, item.getEntireRow(), sheet.name);
-        }
+        await this.processHighlight(context, item.getEntireRow(), sheet.name);
       }
     }).catch((error) => {
       this.setError([error.message, error.code, "executeHighlight"]);
@@ -95,39 +89,10 @@ export default class Highlighter {
     try {
       await context.sync();
 
+      // Save the highlighted row to the local storage
       await Storage.setPrevious(sheetName, range.address, count.value - 1);
     } catch (error) {
       this.setError([error.message, error.code, "processHighlight"]);
-    }
-  }
-
-  private async processHighlightEachRow(context: Excel.RequestContext, range: Excel.Range, sheetName: string) {
-    try {
-      range.load("rowCount");
-      await context.sync();
-
-      // Get the rows      
-      const rows: { row: Excel.Range, adress: string, id: number | false }[] = [];
-      for (let i = 0; i < range.rowCount; i++) {
-        const row = range.getRow(i);
-        row.load("address");
-        await context.sync();
-
-        rows.push({ row, adress: row.address, id: Storage.rowExists(sheetName, row.address) });
-      }
-
-      const selectedHighlight = rows.filter((row) => row.id === false);
-      if (selectedHighlight.length) {
-        for (const row of selectedHighlight) {
-          await this.processHighlight(context, row.row, sheetName);
-        }
-      } else {
-        for (const row of rows) {
-          await Cleaner.create(this.setError).clearRow(context, row.row, sheetName, row.adress, row.id as number);
-        }
-      }
-    } catch (error) {
-      this.setError([error.message, error.code, "processHighlightEachRow"]);
     }
   }
 }

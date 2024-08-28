@@ -6,7 +6,7 @@ import { SetError } from "../hooks/useErrorSnackbar";
 import useHighlightRow from "../utils/highlightRow/useHighlightRow";
 
 export default function HighlightRow({ setError }: { setError: SetError }) {
-  const { isEnabled, setIsEnabled, xColor, setXColor, keepSelection, setKeepSelection } = useHighlightRow(setError);
+  const { isEnabled, setIsEnabled, xColor, setXColor } = useHighlightRow(setError);
 
   const inputColorRef = useRef<HTMLInputElement | undefined>();
 
@@ -33,17 +33,6 @@ export default function HighlightRow({ setError }: { setError: SetError }) {
           disabled={!isEnabled}
         ></input>
       </Button>
-      {/* <FormControlLabel
-        sx={{ width: "fit-content", userSelect: "none" }}
-        control={
-          <Switch
-            onChange={(e) => setKeepSelection(e.target.checked)}
-            color="secondary"
-            defaultChecked={keepSelection}
-          />
-        }
-        label="Keep Selection"
-      /> */}
     </Stack>
   );
 }

@@ -8,13 +8,12 @@ type EventHandlerResult = OfficeExtension.EventHandlerResult<any>;
 
 export default function useHighlightRow(setError: SetError) {
   const [isEnabled, setIsEnabled] = useState<boolean>(false);
-  const [keepSelection, setKeepSelection] = useState<boolean>(false);
   const [xColor, setXColor] = useState(Storage.xColor() ?? "#9CC8F5");
 
-  const option = useRef<HighlighterOption>({ keepSelection, xColor });
+  const option = useRef<HighlighterOption>({ xColor });
   const eventResults = useRef<EventHandlerResult[]>([]);
 
-  option.current = { keepSelection, xColor };
+  option.current = { xColor };
 
   // Initialize the class and set up event handlers
   const setEventHadlers = async () => {
@@ -22,17 +21,7 @@ export default function useHighlightRow(setError: SetError) {
       const worksheets = context.workbook.worksheets;
 
       // Register event handler for selection change
-      const selection = worksheets.onSelectionChanged.add(async (event) => {
-        // Check if the selection is a single cell when the keepSelection option is enabled
-        if(!event.address.includes(":") && option.current.keepSelection) return;
-        
-        await Highlighter.create(setError, option.current).updateRow();
-      });
-
-      // Register event handler for single click
-      const click = worksheets.onSingleClicked.add(async () => {
-        // Check if the keepSelection option is enabled
-        if (!option.current.keepSelection) return;
+      const selection = worksheets.onSelectionChanged.add(async () => {
         await Highlighter.create(setError, option.current).updateRow();
       });
 
@@ -42,7 +31,9 @@ export default function useHighlightRow(setError: SetError) {
       });
 
       await context.sync();
-      eventResults.current.push(selection, name, click);
+
+      // Store the event handlers
+      eventResults.current.push(selection, name);
     }).catch((error) => {
       this.setError([error.message, error.code, "setEventHadlers"]);
     });
@@ -77,18 +68,14 @@ export default function useHighlightRow(setError: SetError) {
     isEnabled && Highlighter.create(setError, option.current).changeColor();
     isEnabled && Storage.xColor(xColor);
 
-    if (!keepSelection && !isEnabled) {
-      // Clear the previous conditional format
-      Cleaner.create(setError).clearPrevious();
-    }
-  }, [xColor, isEnabled, keepSelection]);
+    // Clear the previous highlight
+    !isEnabled && Cleaner.create(setError).clearPrevious();
+  }, [xColor, isEnabled]);
 
   return {
     isEnabled,
     setIsEnabled,
     xColor,
     setXColor,
-    keepSelection,
-    setKeepSelection
   };
 }

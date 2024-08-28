@@ -78,16 +78,4 @@ export default class HighlightCleaner {
       }
     }
   }
-
-  public async clearRow(context: Excel.RequestContext, range: Excel.Range, sheetName: string, adress: string, id: number) {
-    try {
-      range.conditionalFormats.getItemAt(id).delete();
-
-      await context.sync();
-
-      await Storage.deleteRow(sheetName, adress, id);
-    } catch (error) {
-      this.setError([error.message, error.code, "clearRow"]);
-    }
-  }
 }
