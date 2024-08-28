@@ -8,7 +8,7 @@ npm start # Excel starts with add-in sideloaded
 ```
 https://learn.microsoft.com/en-us/office/dev/add-ins/quickstarts/excel-quickstart-react?view=excel-js-preview#explore-the-project
 
-Here is the README for the "Office-Addin-TaskPane-React" that serves as the base for this project.
+Here is the README for the [Office-Addin-TaskPane-React](https://github.com/OfficeDev/Office-Addin-TaskPane-React) that serves as the base for this project.
 
 ># Office-Addin-TaskPane-React
 >This repository contains the source code used by the [Yo Office generator](https://github.com/OfficeDev/generator-office) when you create a new Office Add-in that appears in the task pane. You can also use this repository as a sample to base your own project from if you choose not to use the generator.
