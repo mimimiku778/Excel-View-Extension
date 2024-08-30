@@ -1,8 +1,7 @@
 ```bash
 git clone https://github.com/mimimiku778/Excel-View-Extension.git
 cd Excel-View-Extension
-
-npm run install
+npm install
 npm run dev-server # required only by mac
 npm start # Excel starts with add-in sideloaded
 ```
