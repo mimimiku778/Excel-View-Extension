@@ -11,12 +11,26 @@ export default function useHighlightRow(setError: SetError) {
   const [xColor, setXColor] = useState(Storage.xColor() ?? "#9CC8F5");
 
   const option = useRef<HighlighterOption>({ xColor });
-  const eventResults = useRef<EventHandlerResult[]>([]);
+  const eventResults = useRef<{ id: number; results: EventHandlerResult[] }>({ id: 0, results: [] });
 
   option.current = { xColor };
 
+  // Cleanup function for removing event handlers
+  const cleanupEventHandlers = async (results: EventHandlerResult[]) => {
+    for (const event of results) {
+      await Excel.run(event.context, async (context) => {
+        // Remove the event handler
+        event.remove();
+
+        await context.sync();
+      }).catch((error) => {
+        setError([error.message, error.code, "cleanupEventHandlers"]);
+      });
+    }
+  };
+
   // Initialize the class and set up event handlers
-  const setEventHadlers = async () => {
+  const setEventHadlers = async (id: number) => {
     await Excel.run(async (context) => {
       const worksheets = context.workbook.worksheets;
 
@@ -30,36 +44,30 @@ export default function useHighlightRow(setError: SetError) {
         await Storage.renameWorksheet(event.nameAfter, event.nameBefore);
       });
 
-      await context.sync();
 
-      // Store the event handlers
-      eventResults.current.push(selection, name);
+      await context.sync();
+      const results: EventHandlerResult[] = [selection, name];
+
+      if (eventResults.current.id === id) {
+        eventResults.current.results = results;
+      } else {
+        cleanupEventHandlers(results);
+      }
     }).catch((error) => {
-      this.setError([error.message, error.code, "setEventHadlers"]);
+      setError([error.message, error.code, "setEventHadlers"]);
     });
   }
 
-  // Cleanup function for removing event handlers
-  const cleanupEventHandlers = async () => {
-    for (const event of eventResults.current) {
-      await Excel.run(event.context, async (context) => {
-        // Remove the event handler
-        event.remove();
-
-        await context.sync();
-      }).catch((error) => {
-        this.setError([error.message, error.code, "cleanupEventHandlers"]);
-      });
-    }
-
-    eventResults.current = [];
-  };
-
   useEffect(() => {
-    isEnabled && setEventHadlers()
+    if (!isEnabled) return undefined;
+
+    const id = performance.now();
+    eventResults.current.id = id;
+    setEventHadlers(id);
 
     return () => {
-      isEnabled && cleanupEventHandlers();
+      eventResults.current.id = 0;
+      cleanupEventHandlers(eventResults.current.results);
     };
   }, [isEnabled]);
 
